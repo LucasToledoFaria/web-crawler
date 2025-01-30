@@ -11,6 +11,9 @@ async def fetch(session, url, semaphore):
             async with session.get(url) as response:
                 if response.status != 200:
                     return None
+                content_type = response.headers.get('Content-Type', '').lower()
+                if 'text/html' not in content_type:
+                    return None
                 return await response.text()
         except Exception as e:
             print(f"Error fetching {url}: {e}")
