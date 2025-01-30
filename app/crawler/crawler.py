@@ -1,33 +1,8 @@
 import aiohttp
 import asyncio
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
-import json
-
-
-def is_valid_url(url):
-    parsed = urlparse(url)
-    return bool(parsed.netloc) and bool(parsed.scheme)
-
-
-def is_media_url(url):
-    media_extensions = (
-        ".jpg",
-        ".jpeg",
-        ".png",
-        ".gif",
-        ".bmp",
-        ".webp",
-        ".mp4",
-        ".mp3",
-        ".avi",
-        ".mov",
-        ".wmv",
-        ".flv",
-        ".mkv",
-        ".pdf",
-    )
-    return url.lower().endswith(media_extensions)
+from urllib.parse import urljoin
+from app.crawler.utils import is_valid_url, is_media_url
 
 
 async def fetch(session, url, semaphore):
