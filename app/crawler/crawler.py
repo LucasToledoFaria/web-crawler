@@ -59,10 +59,10 @@ async def get_links(session, url, depth, max_urls, visited, all_urls, semaphore,
 
 
 async def main(url, **kwargs):
-    max_depth = kwargs.get("max_depth", 100)
-    max_urls = kwargs.get("max_urls", 5000)
-    max_connections = kwargs.get("max_connections", 10)
-    max_host_connections = kwargs.get("max_host_connections", 5)
+    max_depth = kwargs.get("max_depth", 3)
+    max_urls = kwargs.get("max_urls", 200)
+    max_connections = kwargs.get("max_connections", 20)
+    max_host_connections = kwargs.get("max_host_connections", 10)
 
     visited = set()
     all_urls = []
