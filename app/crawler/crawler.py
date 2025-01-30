@@ -3,6 +3,7 @@ import asyncio
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from app.crawler.utils import is_valid_url, is_media_url
+from asyncio import Lock
 
 
 async def fetch(session, url, semaphore):
@@ -20,8 +21,8 @@ async def fetch(session, url, semaphore):
             return None
 
 
-async def get_links(session, url, depth, max_urls, visited, all_urls, semaphore):
-    if depth == 0 or max_urls <= 0:
+async def get_links(session, url, depth, max_urls, visited, all_urls, semaphore, url_counter, lock):
+    if depth == 0:
         return {"link": url, "founded_links": []}
 
     data = await fetch(session, url, semaphore)
@@ -32,22 +33,24 @@ async def get_links(session, url, depth, max_urls, visited, all_urls, semaphore)
     links = soup.find_all("a")
 
     urls = []
-    for link in links:
-        route = link.get("href")
-        if route:
-            full_url = urljoin(url, route)
-            if is_valid_url(full_url) and not is_media_url(full_url):
-                all_urls.append(full_url)
-                if full_url not in visited:
+    async with lock:
+        if url_counter[0] >= max_urls:
+            return {"link": url, "founded_links": []}
+
+        for link in links:
+            route = link.get("href")
+            if route:
+                full_url = urljoin(url, route)
+                if is_valid_url(full_url) and not is_media_url(full_url) and full_url not in visited:
+                    all_urls.append(full_url)
                     visited.add(full_url)
                     urls.append(full_url)
-                    if len(urls) >= max_urls:
+                    url_counter[0] += 1
+                    if url_counter[0] >= max_urls:
                         break
 
     tasks = [
-        get_links(
-            session, link, depth - 1, max_urls - len(urls), visited, all_urls, semaphore
-        )
+        get_links(session, link, depth - 1, max_urls, visited, all_urls, semaphore, url_counter, lock)
         for link in urls
     ]
     founded_links = await asyncio.gather(*tasks)
@@ -63,15 +66,14 @@ async def main(url, **kwargs):
 
     visited = set()
     all_urls = []
+    url_counter = [0]
+    lock = Lock()
     semaphore = asyncio.Semaphore(max_connections)
     async with aiohttp.ClientSession(
-        connector=aiohttp.TCPConnector(
-            limit_per_host=max_host_connections,
-        )
+        connector=aiohttp.TCPConnector(limit_per_host=max_host_connections)
     ) as session:
         urls_dict = await get_links(
-            session, url, max_depth, max_urls, visited, all_urls, semaphore
+            session, url, max_depth, max_urls, visited, all_urls, semaphore, url_counter, lock
         )
 
     return urls_dict, all_urls
-
