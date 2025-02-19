@@ -1,11 +1,12 @@
 <template>
   <div>
-  <div class="search-bar">
-    <input v-model="url" type="text" placeholder="Enter URL" />
-    <button @click="crawl">
-      <span>Crawl</span>
-    </button>
-  </div>
+    <div class="search-bar">
+      <input v-model="url" type="text" placeholder="Enter URL" />
+      <button @click="crawl" :disabled="loading">
+        <span v-if="loading" class="spinner"></span>
+        <span v-else>Crawl</span>
+      </button>
+    </div>
     <div>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
     </div>
@@ -18,6 +19,7 @@ export default {
   data() {
     return {
       url: "",
+      loading: false,
       errorMessage: "",
     };
   },
@@ -44,12 +46,16 @@ export default {
       }
     },
     async crawl() {
+      this.loading = true;
       this.errorMessage = "";
+      this.$emit("loading", true);
       let validatedUrl;
       try {
         validatedUrl = this.validateUrl(this.url);
       } catch (error) {
         this.errorMessage = "Invalid URL. Please enter a valid URL.";
+        this.loading = false;
+        this.$emit("loading", false);
         return;
       }
       try {
@@ -76,6 +82,9 @@ export default {
         console.error("Error:", error);
         this.errorMessage =
           "An error occurred while crawling the URL. Please ensure the URL is valid and try again.";
+      } finally {
+        this.loading = false;
+        this.$emit("loading", false);
       }
     },
   },
@@ -121,8 +130,26 @@ button:hover:enabled {
   background-color: #0056b3;
 }
 
+.spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
 .error-message {
   color: red;
   margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
