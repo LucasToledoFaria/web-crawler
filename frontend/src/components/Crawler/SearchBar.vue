@@ -6,6 +6,16 @@
         <span v-if="loading" class="spinner"></span>
         <span v-else>Crawl</span>
       </button>
+      <button
+        @click="toggleParams"
+        class="gear-button"
+        title="Optional Parameters"
+      >
+        <span :class="{ 'gear-icon': true, open: showParams }">⚙️</span>
+      </button>
+    </div>
+    <div v-if="showParams" class="optional-params-wrapper">
+      <OptionalParams v-model="params" />
     </div>
     <div>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
@@ -14,16 +24,31 @@
 </template>
 
 <script>
+import OptionalParams from "./OptionalParams.vue";
+
 export default {
   name: "SearchBar",
+  components: {
+    OptionalParams,
+  },
   data() {
     return {
       url: "",
       loading: false,
       errorMessage: "",
+      showParams: false,
+      params: {
+        max_depth: 3,
+        max_urls: 200,
+        max_connections: 20,
+        max_host_connections: 10,
+      },
     };
   },
   methods: {
+    toggleParams() {
+      this.showParams = !this.showParams;
+    },
     validateUrl(url) {
       try {
         const parsedUrl = new URL(url);
@@ -45,6 +70,19 @@ export default {
         throw new Error("Invalid URL");
       }
     },
+    validateParams(params) {
+      const validatedParams = {};
+      for (const key in params) {
+        if (params[key] !== "") {
+          if (params[key] < 1) {
+            this.errorMessage = `${key.replace("_", " ")} must be 1 or more.`;
+            return null;
+          }
+          validatedParams[key] = params[key];
+        }
+      }
+      return validatedParams;
+    },
     async crawl() {
       this.loading = true;
       this.errorMessage = "";
@@ -58,6 +96,12 @@ export default {
         this.$emit("loading", false);
         return;
       }
+      const validatedParams = this.validateParams(this.params);
+      if (!validatedParams) {
+        this.loading = false;
+        this.$emit("loading", false);
+        return;
+      }
       try {
         const response = await fetch("http://localhost:8080/", {
           method: "POST",
@@ -66,10 +110,7 @@ export default {
           },
           body: JSON.stringify({
             url: validatedUrl,
-            max_depth: 3,
-            max_urls: 200,
-            max_connections: 20,
-            max_host_connections: 10,
+            ...validatedParams,
           }),
         });
         if (!response.ok) {
@@ -98,6 +139,29 @@ export default {
   justify-content: center;
   align-items: center;
   margin: 1rem;
+}
+
+.gear-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  align-self: center;
+  border-radius: 50%;
+  padding: 0.3rem 0.3rem;
+  margin-left: 0.5rem;
+}
+
+.gear-button:hover:enabled {
+  background-color: #0057b315;
+}
+
+.gear-icon {
+  transition: transform 0.3s;
+}
+
+.gear-icon.open {
+  transform: rotate(90deg);
 }
 
 input {
