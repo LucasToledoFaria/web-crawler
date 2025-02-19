@@ -113,7 +113,7 @@ function scrollToParent(link, event) {
   transition: background-color 0.3s, box-shadow 0.3s;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
   min-width: 300px;
-  max-width: 100%;
+  max-width: 1000px;
   word-wrap: break-word;
 }
 
