@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="search-bar">
-      <input v-model="url" type="text" placeholder="Enter URL" />
+      <input v-model="url" type="text" placeholder="Enter URL" @keyup.enter="crawl" />
       <button @click="crawl" :disabled="loading">
         <span v-if="loading" class="spinner"></span>
         <span v-else>Crawl</span>
