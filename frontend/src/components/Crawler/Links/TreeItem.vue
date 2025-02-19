@@ -30,6 +30,24 @@ function openLink(url) {
     window.open(url, "_blank");
   }
 }
+
+function scrollToParent(link, event) {
+  if (event.target.classList.contains("nested-links")) {
+    nextTick(() => {
+      const parentElement = document.getElementById(link);
+      if (parentElement) {
+        const headerOffset = 80;
+        const elementPosition = parentElement.getBoundingClientRect().top;
+        const offsetPosition =
+          elementPosition + window.scrollY - headerOffset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      }
+    });
+  }
+}
 </script>
 
 <template>
@@ -45,7 +63,12 @@ function openLink(url) {
       <button class="open-link" @click.stop="openLink(model.link)">Open</button>
     </div>
     <transition name="fade">
-      <div v-show="isOpen[model.link]" v-if="isFolder" class="nested-links">
+      <div
+        v-show="isOpen[model.link]"
+        v-if="isFolder"
+        class="nested-links"
+        @click.stop="(event) => scrollToParent(model.link, event)"
+      >
         <TreeItem
           v-for="child in model.founded_links"
           :key="child.link"
