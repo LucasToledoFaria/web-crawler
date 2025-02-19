@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, ForwardRef
 from pydantic import BaseModel, HttpUrl, Field, ValidationError
 from app.crawler.crawler import main as crawler
@@ -7,6 +8,14 @@ app = FastAPI(
     title="Website Crawler API",
     description="Crawl a site to extract all links from the main page and its referenced pages.",
     version="0.0.1"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 URLsDictRef = ForwardRef("URLsDict")
