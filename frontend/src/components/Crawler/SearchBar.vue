@@ -1,9 +1,14 @@
 <template>
+  <div>
   <div class="search-bar">
     <input v-model="url" type="text" placeholder="Enter URL" />
     <button @click="crawl">
       <span>Crawl</span>
     </button>
+  </div>
+    <div>
+      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+    </div>
   </div>
 </template>
 
@@ -13,10 +18,40 @@ export default {
   data() {
     return {
       url: "",
+      errorMessage: "",
     };
   },
   methods: {
+    validateUrl(url) {
+      try {
+        const parsedUrl = new URL(url);
+        return parsedUrl.href;
+      } catch (_) {
+        if (!/^https?:\/\//i.test(url)) {
+          const prefixedUrl = `https://${url}`;
+          try {
+            const parsedUrl = new URL(prefixedUrl);
+            if (parsedUrl.hostname.includes(".")) {
+              return parsedUrl.href;
+            } else {
+              throw new Error("Invalid URL");
+            }
+          } catch (_) {
+            throw new Error("Invalid URL");
+          }
+        }
+        throw new Error("Invalid URL");
+      }
+    },
     async crawl() {
+      this.errorMessage = "";
+      let validatedUrl;
+      try {
+        validatedUrl = this.validateUrl(this.url);
+      } catch (error) {
+        this.errorMessage = "Invalid URL. Please enter a valid URL.";
+        return;
+      }
       try {
         const response = await fetch("http://localhost:8080/", {
           method: "POST",
@@ -24,7 +59,7 @@ export default {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            url: this.url,
+            url: validatedUrl,
             max_depth: 3,
             max_urls: 200,
             max_connections: 20,
@@ -39,6 +74,8 @@ export default {
         console.log(data);
       } catch (error) {
         console.error("Error:", error);
+        this.errorMessage =
+          "An error occurred while crawling the URL. Please ensure the URL is valid and try again.";
       }
     },
   },
@@ -82,5 +119,10 @@ button:disabled {
 
 button:hover:enabled {
   background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  margin-bottom: 1.5rem;
 }
 </style>
