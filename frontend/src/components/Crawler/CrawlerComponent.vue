@@ -1,16 +1,19 @@
 <template>
   <div>
     <SearchBar @crawl-success="handleCrawlSuccess" />
+    <Links v-if="responseData" :treeData="responseData.urls_dict" />
   </div>
 </template>
 
 <script>
 import SearchBar from "./SearchBar.vue";
+import Links from "./Links/Links.vue";
 
 export default {
   name: "CrawlerComponent",
   components: {
     SearchBar,
+    Links,
   },
   data() {
     return {
