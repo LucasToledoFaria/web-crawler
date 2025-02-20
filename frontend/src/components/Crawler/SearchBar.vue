@@ -19,6 +19,7 @@
     </div>
     <div>
       <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+      <p v-if="successMessage" class="success-message">{{ successMessage }}</p>
     </div>
   </div>
 </template>
@@ -36,6 +37,7 @@ export default {
       url: "",
       loading: false,
       errorMessage: "",
+      successMessage: "",
       showParams: false,
       params: {
         max_depth: 3,
@@ -83,9 +85,20 @@ export default {
       }
       return validatedParams;
     },
+    calculateMaxDepth(urlsDict, depth = 0) {
+      if (!urlsDict.founded_links || urlsDict.founded_links.length === 0) {
+        return depth;
+      }
+      return Math.max(
+        ...urlsDict.founded_links.map((link) =>
+          this.calculateMaxDepth(link, depth + 1)
+        )
+      );
+    },
     async crawl() {
       this.loading = true;
       this.errorMessage = "";
+      this.successMessage = "";
       this.$emit("loading", true);
       let validatedUrl;
       try {
@@ -118,6 +131,8 @@ export default {
         }
         const data = await response.json();
         this.$emit("crawl-success", data);
+        const maxDepth = this.calculateMaxDepth(data.urls_dict);
+        this.successMessage = `Crawl completed successfully. Found ${data.all_urls.length} URLs with a maximum depth of ${maxDepth}.`;
         console.log(data);
       } catch (error) {
         console.error("Error:", error);
@@ -205,6 +220,11 @@ button:hover:enabled {
 
 .error-message {
   color: red;
+  margin-bottom: 1.5rem;
+}
+
+.success-message {
+  color: green;
   margin-bottom: 1.5rem;
 }
 
