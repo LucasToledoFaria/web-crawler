@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import SearchBar from "./SearchBar.vue";
+import SearchBar from "./SearchBar/SearchBar.vue";
 import Links from "./Links/Links.vue";
 import DownloadButtons from "./DownloadButtons.vue";
 
