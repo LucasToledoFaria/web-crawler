@@ -1,20 +1,23 @@
 <template>
   <div>
     <SearchBar @crawl-success="handleCrawlSuccess" @loading="setLoading" />
+    <DownloadButtons v-if="responseData" :responseData="responseData" />
     <div v-if="loading" class="spinner"></div>
     <Links v-if="responseData" :treeData="responseData.urls_dict" />
   </div>
 </template>
 
 <script>
-import SearchBar from "./SearchBar.vue";
+import SearchBar from "./SearchBar/SearchBar.vue";
 import Links from "./Links/Links.vue";
+import DownloadButtons from "./DownloadButtons.vue";
 
 export default {
   name: "CrawlerComponent",
   components: {
     SearchBar,
     Links,
+    DownloadButtons,
   },
   data() {
     return {
