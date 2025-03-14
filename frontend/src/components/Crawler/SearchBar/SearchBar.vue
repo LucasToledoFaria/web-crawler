@@ -116,7 +116,7 @@ export default {
         return;
       }
       try {
-        const response = await fetch("http://localhost:8080/", {
+        const response = await fetch(process.env.VUE_APP_API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
