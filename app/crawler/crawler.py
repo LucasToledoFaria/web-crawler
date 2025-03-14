@@ -1,25 +1,29 @@
 import aiohttp
 import asyncio
+import logging
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from app.crawler.utils import is_valid_url, is_media_url
 from asyncio import Lock
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 async def fetch(session, url, semaphore):
     async with semaphore:
         try:
             async with session.get(url) as response:
                 if response.status != 200:
+                    logger.warning(f"Non-200 status code for URL: {url}")
                     return None
                 content_type = response.headers.get('Content-Type', '').lower()
                 if 'text/html' not in content_type:
+                    logger.warning(f"Non-HTML content type for URL: {url}")
                     return None
                 return await response.text()
         except Exception as e:
-            print(f"Error fetching {url}: {e}")
+            logger.error(f"Error fetching {url}: {e}")
             return None
-
 
 async def get_links(session, url, depth, max_urls, visited, all_urls, semaphore, url_counter, lock):
     if depth == 0:
@@ -57,7 +61,6 @@ async def get_links(session, url, depth, max_urls, visited, all_urls, semaphore,
 
     return {"link": url, "founded_links": founded_links}
 
-
 async def main(url, **kwargs):
     max_depth = kwargs.get("max_depth", 3)
     max_urls = kwargs.get("max_urls", 200)
@@ -75,5 +78,7 @@ async def main(url, **kwargs):
         urls_dict = await get_links(
             session, url, max_depth, max_urls, visited, all_urls, semaphore, url_counter, lock
         )
+
+    logger.info(f"Crawl completed for URL: {url}")
 
     return urls_dict, all_urls

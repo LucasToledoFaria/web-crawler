@@ -1,8 +1,12 @@
+import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, ForwardRef
 from pydantic import BaseModel, HttpUrl, Field, ValidationError
 from app.crawler.crawler import main as crawler
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Website Crawler API",
@@ -43,6 +47,8 @@ async def crawl(params: Params) -> CrawlResponse:
         urls_dict, all_urls = await crawler(params.url, **params.dict(exclude={"url"}))
         return CrawlResponse(urls_dict=urls_dict, all_urls=all_urls)
     except ValidationError as e:
+        logger.error(f"Validation error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        logger.error(f"Unexpected error: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
