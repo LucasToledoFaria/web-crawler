@@ -59,7 +59,7 @@ You can adjust these parameters to control the behavior of the crawler according
 3. Activate the virtual environment:
 
    ```bash
-   source venv/bin/activate
+   source app/venv/bin/activate
    ```
 
 4. Run the CLI tool:
@@ -99,7 +99,7 @@ You can adjust these parameters to control the behavior of the crawler according
 3. Activate the virtual environment:
 
    ```bash
-   source venv/bin/activate
+   source app/venv/bin/activate
    ```
 
 4. Start the REST API server:
