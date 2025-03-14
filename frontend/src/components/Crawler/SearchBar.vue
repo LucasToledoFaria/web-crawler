@@ -133,7 +133,6 @@ export default {
         this.$emit("crawl-success", data);
         const maxDepth = this.calculateMaxDepth(data.urls_dict);
         this.successMessage = `Crawl completed successfully. Found ${data.all_urls.length} URLs with a maximum depth of ${maxDepth}.`;
-        console.log(data);
       } catch (error) {
         console.error("Error:", error);
         this.errorMessage =
