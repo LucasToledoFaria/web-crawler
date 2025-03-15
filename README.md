@@ -139,3 +139,55 @@ You can adjust these parameters to control the behavior of the crawler according
 - `max_host_connections`: The maximum number of concurrent connections per host (default: 10). This restricts the number of simultaneous connections to a single host.
 
 You can adjust these parameters to control the behavior of the crawler according to your needs.
+
+### Using the REST API with AWS Lambda
+
+1. Install the required dependencies into a `dependencies` directory:
+
+   ```bash
+   pip3 install -t app/dependencies -r app/requirements.txt -r app/rest-api/requirements.txt
+   ```
+
+2. Create a ZIP file of the dependencies:
+
+   ```bash
+   (cd app/dependencies; zip ../aws_lambda_artifact.zip -r .)
+   ```
+
+3. Add the application code to the ZIP file:
+
+   ```bash
+   zip app/aws_lambda_artifact.zip -u -r app/crawler app/rest-api app/__init__.py
+   ```
+
+4. Upload the `aws_lambda_artifact.zip` file to AWS Lambda and configure the handler to `app.rest-api.main.handler`.
+
+5. Set up the necessary environment variables and API Gateway to trigger the Lambda function.
+
+6. Use the API to crawl a website by sending a POST request to the API Gateway endpoint with the following JSON body:
+
+   ```json
+   {
+     "url": "http://example.com",
+     "max_depth": 3,
+     "max_urls": 200,
+     "max_connections": 20,
+     "max_host_connections": 10
+   }
+   ```
+
+   The API will respond with a JSON object containing:
+
+   - `urls_dict`: A dictionary representing the structure of the crawled URLs.
+   - `all_urls`: A list of all URLs found during the crawl.
+
+7. To see the API documentation, visit the `/docs` endpoint of your API Gateway.
+
+#### Optional Arguments
+
+- `max_depth`: The maximum depth to crawl (default: 3). This controls how many levels deep the crawler will go from the initial URL.
+- `max_urls`: The maximum number of URLs to crawl (default: 200). This limits the total number of URLs the crawler will visit.
+- `max_connections`: The maximum number of concurrent connections (default: 20). This sets the limit on how many simultaneous requests the crawler can make.
+- `max_host_connections`: The maximum number of concurrent connections per host (default: 10). This restricts the number of simultaneous connections to a single host.
+
+You can adjust these parameters to control the behavior of the crawler according to your needs.
