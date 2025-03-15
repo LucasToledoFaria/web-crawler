@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, ForwardRef
 from pydantic import BaseModel, HttpUrl, Field, ValidationError
 from app.crawler.crawler import main as crawler
+from mangum import Mangum
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+handler = Mangum(app)
 
 URLsDictRef = ForwardRef("URLsDict")
 
