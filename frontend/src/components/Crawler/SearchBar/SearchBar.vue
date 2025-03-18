@@ -229,4 +229,16 @@ button:hover:enabled {
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 768px) {
+  input {
+    width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  input {
+    width: 150px;
+  }
+}
 </style>
