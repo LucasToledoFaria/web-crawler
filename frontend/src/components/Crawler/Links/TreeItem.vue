@@ -6,6 +6,10 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  maxWidth: {
+    type: String,
+    default: '90vw'
+  }
 });
 
 const isOpen = ref({});
@@ -52,7 +56,7 @@ function scrollToParent(link, event) {
 
 <template>
   <div class="link-container" v-if="model">
-    <div :id="model.link" class="link-box" @click="toggle(model.link)">
+    <div :id="model.link" class="link-box" @click="toggle(model.link)" :style="{ maxWidth: maxWidth }">
       <span class="icon">
         {{ isFolder ? (isOpen[model.link] ? "▾" : "▸") : "─" }}
       </span>
@@ -90,6 +94,7 @@ function scrollToParent(link, event) {
           v-for="child in model.founded_links"
           :key="child.link"
           :model="child"
+          :maxWidth="maxWidth"
         />
       </div>
     </transition>
@@ -112,8 +117,6 @@ function scrollToParent(link, event) {
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
-  min-width: 300px;
-  max-width: 1000px;
   word-wrap: break-word;
 }
 

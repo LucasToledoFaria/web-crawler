@@ -26,6 +26,7 @@
 
 <script>
 import OptionalParams from "./OptionalParams.vue";
+import { calculateMaxDepth } from "@/utils/calculateMaxDepth";
 
 export default {
   name: "SearchBar",
@@ -86,14 +87,7 @@ export default {
       return validatedParams;
     },
     calculateMaxDepth(urlsDict, depth = 0) {
-      if (!urlsDict.founded_links || urlsDict.founded_links.length === 0) {
-        return depth;
-      }
-      return Math.max(
-        ...urlsDict.founded_links.map((link) =>
-          this.calculateMaxDepth(link, depth + 1)
-        )
-      );
+      return calculateMaxDepth(urlsDict, depth);
     },
     async crawl() {
       this.loading = true;
@@ -233,6 +227,18 @@ button:hover:enabled {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  input {
+    width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  input {
+    width: 150px;
   }
 }
 </style>
